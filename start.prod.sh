@@ -7,10 +7,14 @@ echo "🚀 Starting Medusa in production mode..."
 echo "📊 Running database migrations..."
 npx medusa db:migrate
 
-# Build admin dashboard (only for server mode)
+# Rebuild admin if .medusa doesn't exist (only for server mode)
 if [ "$MEDUSA_WORKER_MODE" = "server" ] || [ -z "$MEDUSA_WORKER_MODE" ]; then
-    echo "🔨 Building admin dashboard..."
-    npx medusa build
+    if [ ! -f "/server/.medusa/server/public/index.html" ]; then
+        echo "🔨 Admin build not found, rebuilding..."
+        npx medusa build
+    else
+        echo "✅ Admin build found, skipping rebuild"
+    fi
 fi
 
 # Check worker mode and start appropriately
