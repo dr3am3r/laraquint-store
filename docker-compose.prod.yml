@@ -65,6 +65,9 @@ services:
       - STORE_CORS=${STORE_CORS}
       - ADMIN_CORS=${ADMIN_CORS}
       - AUTH_CORS=${AUTH_CORS}
+    volumes:
+      # Persist admin build across restarts
+      - medusa_admin:/server/.medusa
     networks:
       - medusa_network
 
@@ -117,6 +120,7 @@ volumes:
   redis_data:
   caddy_data:
   caddy_config:
+  medusa_admin:
 
 networks:
   medusa_network:
