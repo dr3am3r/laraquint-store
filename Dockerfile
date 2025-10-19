@@ -16,5 +16,6 @@ COPY . .
 # Expose the port Medusa runs on
 EXPOSE 9000
 
-# Start with migrations and then the development server
-CMD ["./start.sh"]
+# Start with migrations and then the server
+# Uses start.sh for dev, start.prod.sh for production
+CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"production\" ]; then ./start.prod.sh; else ./start.sh; fi"]

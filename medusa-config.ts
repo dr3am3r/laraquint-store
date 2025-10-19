@@ -15,9 +15,15 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
-    }
+    },
+    redisUrl: process.env.REDIS_URL,
+    workerMode: process.env.MEDUSA_WORKER_MODE as "shared" | "worker" | "server",
   },
-  modules: [
+  admin: {
+    disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
+  },
+  modules: process.env.S3_ACCESS_KEY_ID ? [
+    // S3 File Storage (Cloudflare R2) - only if credentials provided
     {
       resolve: "@medusajs/medusa/file",
       options: {
@@ -32,10 +38,25 @@ module.exports = defineConfig({
               region: process.env.S3_REGION,
               bucket: process.env.S3_BUCKET,
               endpoint: process.env.S3_ENDPOINT,
-              // Optional: Add a prefix for product images (with trailing slash)
               prefix: "products/",
-              // Cache control for better performance
               cache_control: "public, max-age=31536000",
+            },
+          },
+        ],
+      },
+    },
+  ] : [
+    // Local File Storage (fallback)
+    {
+      resolve: "@medusajs/medusa/file",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/file-local",
+            id: "local",
+            options: {
+              upload_dir: "uploads",
+              backend_url: process.env.BACKEND_URL || "http://localhost:9000",
             },
           },
         ],
