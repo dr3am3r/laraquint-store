@@ -17,7 +17,7 @@ services:
     networks:
       - medusa_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-medusa}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-medusa} -d ${POSTGRES_DB:-medusa-store}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,6 +70,12 @@ services:
       - medusa_admin:/server/.medusa
     networks:
       - medusa_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/health || exit 1"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 10
+      start_period: 30s
 
   # Medusa Worker Instance
   # Handles background jobs and scheduled tasks
