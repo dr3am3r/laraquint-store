@@ -4,9 +4,8 @@ FROM node:20-alpine AS base
 # Set working directory
 WORKDIR /server
 
-# Copy package files and yarn config
+# Copy package files
 COPY package.json yarn.lock ./
-COPY .yarnrc.yml ./ 2>/dev/null || :
 
 # Install all dependencies using yarn
 RUN yarn install --frozen-lockfile
