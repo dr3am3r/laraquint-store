@@ -1,0 +1,58 @@
+# Production Dockerfile for Medusa
+FROM node:20-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN yarn build
+
+# Production stage
+FROM node:20-alpine
+
+# Install dumb-init to handle signals properly
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S medusa && \
+    adduser -S medusa -u 1001
+
+WORKDIR /app
+
+# Copy package files and install production dependencies only
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+RUN yarn install --production --frozen-lockfile
+
+# Copy built application from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/medusa-config.ts ./
+
+# Copy start script
+COPY start.sh ./
+RUN chmod +x start.sh
+
+# Change ownership to non-root user
+RUN chown -R medusa:medusa /app
+
+# Switch to non-root user
+USER medusa
+
+# Expose port
+EXPOSE 9000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["./start.sh"]

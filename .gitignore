@@ -1,6 +1,10 @@
 /dist
 .env
+.env.production
+.env.local
 .DS_Store
+backups/
+*.sql
 /uploads
 /node_modules
 yarn-error.log
