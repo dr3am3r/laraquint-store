@@ -1,7 +1,4 @@
 {$DOMAIN} {
-    # Enable automatic HTTPS
-    encode gzip
-
     # Reverse proxy to Medusa server
     reverse_proxy medusa-server:9000 {
         # Health check
@@ -9,6 +6,9 @@
         health_interval 10s
         health_timeout 5s
     }
+
+    # Enable gzip compression
+    encode gzip
 
     # Security headers
     header {

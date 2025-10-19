@@ -7,6 +7,12 @@ echo "🚀 Starting Medusa in production mode..."
 echo "📊 Running database migrations..."
 npx medusa db:migrate
 
+# Build admin dashboard (only for server mode)
+if [ "$MEDUSA_WORKER_MODE" = "server" ] || [ -z "$MEDUSA_WORKER_MODE" ]; then
+    echo "🔨 Building admin dashboard..."
+    npx medusa build
+fi
+
 # Check worker mode and start appropriately
 if [ "$MEDUSA_WORKER_MODE" = "worker" ]; then
     echo "👷 Starting Medusa worker (background jobs only)..."
