@@ -1,10 +1,23 @@
-{$DOMAIN} {
+# Configuration for Cloudflare proxied setup
+{
+    # Disable automatic HTTPS (Cloudflare handles it)
+    auto_https off
+}
+
+# Listen on both HTTP and HTTPS
+# Cloudflare will connect via HTTPS in "Full" mode
+:80, :443 {
     # Reverse proxy to Medusa server
     reverse_proxy medusa-server:9000 {
         # Health check
         health_uri /health
         health_interval 10s
         health_timeout 5s
+
+        # Trust Cloudflare's headers
+        header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-Proto {http.request.header.CF-Visitor}
     }
 
     # Enable gzip compression
@@ -12,8 +25,6 @@
 
     # Security headers
     header {
-        # Enable HSTS
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         # Prevent clickjacking
         X-Frame-Options "SAMEORIGIN"
         # Prevent MIME type sniffing
@@ -26,7 +37,7 @@
 
     # Logging
     log {
-        output file /var/log/caddy/access.log
+        output stdout
         format json
     }
 }
