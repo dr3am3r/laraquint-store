@@ -3,25 +3,24 @@ set -e
 
 echo "🚀 Starting Medusa in production mode..."
 
-# Run migrations
+# Run migrations from source directory
 echo "📊 Running database migrations..."
 npx medusa db:migrate
 
-# Always build admin on startup for server mode (volumes override Docker build)
-if [ "$MEDUSA_WORKER_MODE" = "server" ] || [ -z "$MEDUSA_WORKER_MODE" ]; then
-    echo "🔨 Building admin dashboard..."
-    npx medusa build
-    echo "✅ Admin build completed!"
-fi
-
-# Check worker mode and start appropriately
+# Check worker mode
 if [ "$MEDUSA_WORKER_MODE" = "worker" ]; then
+    # Workers don't need admin build, start directly
     echo "👷 Starting Medusa worker (background jobs only)..."
     npx medusa start
-elif [ "$MEDUSA_WORKER_MODE" = "server" ]; then
-    echo "🌐 Starting Medusa server (API + Admin)..."
-    npx medusa start
 else
-    echo "⚠️  MEDUSA_WORKER_MODE not set, starting in shared mode..."
-    npx medusa start
+    # Server mode - build and run from build directory
+    echo "🔨 Building Medusa application (backend + admin)..."
+    npx medusa build
+
+    echo "📦 Installing dependencies in build directory..."
+    cd /server/.medusa/server
+    yarn install --production --frozen-lockfile
+
+    echo "🌐 Starting Medusa server from build directory..."
+    NODE_ENV=production yarn start
 fi
