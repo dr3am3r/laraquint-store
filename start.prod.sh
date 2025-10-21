@@ -9,16 +9,16 @@ npx medusa db:migrate
 
 # Rebuild admin if .medusa doesn't exist (only for server mode)
 if [ "$MEDUSA_WORKER_MODE" = "server" ] || [ -z "$MEDUSA_WORKER_MODE" ]; then
-    if [ ! -f "/server/.medusa/server/public/index.html" ]; then
+    if [ ! -d "/server/.medusa/server/admin" ]; then
         echo "🔨 Admin build not found, rebuilding..."
         npx medusa build
 
         # Wait and verify the build completed successfully
         echo "⏳ Verifying admin build completion..."
-        if [ ! -f "/server/.medusa/server/public/index.html" ]; then
-            echo "❌ ERROR: Admin build failed - index.html not found!"
+        if [ ! -d "/server/.medusa/server/admin" ]; then
+            echo "❌ ERROR: Admin build failed - admin directory not found!"
             echo "Build directory contents:"
-            ls -la /server/.medusa/server/public/ || echo "Directory doesn't exist"
+            ls -la /server/.medusa/server/ || echo "Directory doesn't exist"
             exit 1
         fi
         echo "✅ Admin build completed successfully!"
