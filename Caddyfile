@@ -1,12 +1,7 @@
-# Configuration for Cloudflare proxied setup
-{
-    # Disable automatic HTTPS (Cloudflare handles it)
-    auto_https off
-}
+# Configuration for Cloudflare proxied setup (Full SSL mode)
+# Caddy will auto-generate self-signed certificates for Cloudflare to connect to
 
-# Listen on both HTTP and HTTPS
-# Cloudflare will connect via HTTPS in "Full" mode
-:80, :443 {
+{$DOMAIN:api.laraquint.com} {
     # Reverse proxy to Medusa server
     reverse_proxy medusa-server:9000 {
         # Health check
@@ -17,7 +12,7 @@
         # Trust Cloudflare's headers
         header_up X-Real-IP {http.request.header.CF-Connecting-IP}
         header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
-        header_up X-Forwarded-Proto {http.request.header.CF-Visitor}
+        header_up X-Forwarded-Proto https
     }
 
     # Enable gzip compression
