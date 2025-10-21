@@ -7,24 +7,11 @@ echo "🚀 Starting Medusa in production mode..."
 echo "📊 Running database migrations..."
 npx medusa db:migrate
 
-# Rebuild admin if .medusa doesn't exist (only for server mode)
+# Always build admin on startup for server mode (volumes override Docker build)
 if [ "$MEDUSA_WORKER_MODE" = "server" ] || [ -z "$MEDUSA_WORKER_MODE" ]; then
-    if [ ! -d "/server/.medusa/server" ] || [ -z "$(ls -A /server/.medusa/server 2>/dev/null)" ]; then
-        echo "🔨 Admin build not found, rebuilding..."
-        npx medusa build
-
-        # Verify the build created files
-        echo "⏳ Verifying admin build completion..."
-        if [ ! -d "/server/.medusa/server" ] || [ -z "$(ls -A /server/.medusa/server 2>/dev/null)" ]; then
-            echo "❌ ERROR: Admin build failed - no build output!"
-            echo "Build directory contents:"
-            ls -la /server/.medusa/ || echo "Directory doesn't exist"
-            exit 1
-        fi
-        echo "✅ Admin build completed successfully!"
-    else
-        echo "✅ Admin build found, skipping rebuild"
-    fi
+    echo "🔨 Building admin dashboard..."
+    npx medusa build
+    echo "✅ Admin build completed!"
 fi
 
 # Check worker mode and start appropriately

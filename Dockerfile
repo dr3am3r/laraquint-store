@@ -13,8 +13,8 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build for production (creates .medusa directory with admin)
-RUN NODE_ENV=production npx medusa build || echo "Build failed, will retry at startup"
+# Don't build here - the volume mount will override it anyway
+# Build happens in start.prod.sh after volume is mounted
 
 # Expose the port Medusa runs on
 EXPOSE 9000
